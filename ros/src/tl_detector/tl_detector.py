@@ -13,6 +13,7 @@ import yaml
 from scipy.spatial import KDTree 
 
 STATE_COUNT_THRESHOLD = 3
+NO_OF_IMAGES_TO_SKIP = 7
 
 class TLDetector(object):
     def __init__(self):
@@ -25,6 +26,8 @@ class TLDetector(object):
         # way points KD Tree
         self.waypoints_2d = None
         self.waypoint_tree = None
+
+        self.image_count = 0
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -77,6 +80,12 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
+        if self.image_count != 0 and NO_OF_IMAGES_TO_SKIP % self.image_count != 0:
+            self.image_count = NO_OF_IMAGES_TO_SKIP % (self.image_count + 1)
+            return
+        
+        self.image_count = 1
+
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
@@ -154,8 +163,10 @@ class TLDetector(object):
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
         #TODO find the closest visible traffic light (if one exists)
+        rospy.loginfo("process_traffic_lights")
         diff = len(self.waypoints.waypoints)
         for i, light in enumerate(self.lights):
+            # rospy.loginfo("processing light at index {0}".format(i))
             # Get stop line waypoint index
             line = stop_line_positions[i]
             temp_wp_idx = self.get_closest_waypoint(line[0], line[1])
@@ -166,11 +177,15 @@ class TLDetector(object):
                 closest_light = light
                 line_wp_idx = temp_wp_idx
 
+        rospy.loginfo("closest_light is at {0}, car is at {1}".format(closest_light.pose.pose.position.x, self.pose.pose.position.x))
+
 
         if closest_light:
             state = self.get_light_state(closest_light)
+            rospy.loginfo("process_traffic_lights returns {0} and {1}".format(line_wp_idx, state))
             return line_wp_idx, state
         # self.waypoints = None
+        rospy.loginfo("process_traffic_lights returns default values")
         return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':
