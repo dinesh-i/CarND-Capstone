@@ -46,53 +46,53 @@ class TLClassifier(object):
 
         return class_index
 
-def load_model(self, model_path):
-    config = tf.ConfigProto()
-    config.graph_options.optimizer_options.global_jit_level = tf.OptimtizerOptions.ON_1
+    def load_model(self, model_path):
+        config = tf.ConfigProto()
+        config.graph_options.optimizer_options.global_jit_level = tf.OptimizerOptions.ON_1
 
-    self.model_graph = tf.Graph()
-    with tf.Session(graph = self.model_graph, config=config) as sess:
-        self.session = sess
-        od_graph_def = tf.GraphDef()
-        with tf.gfile.GFile(model_path, 'rb') as file_id:
-            serialized_graph = file_id.read()
-            od_graph_def.PraseFromString(serialized_graph)
-            tf.import_graph_def(od_graph_def, name='')
+        self.model_graph = tf.Graph()
+        with tf.Session(graph = self.model_graph, config=config) as sess:
+            self.session = sess
+            od_graph_def = tf.GraphDef()
+            with tf.gfile.GFile(model_path, 'rb') as file_id:
+                serialized_graph = file_id.read()
+                od_graph_def.ParseFromString(serialized_graph)
+                tf.import_graph_def(od_graph_def, name='')
 
-def predict(self, image_np, min_score_threshold=0.5):
-    image_tensor = self.model_graph.get_tensor_by_name('image_tensor:0')
-    detection_boxes = self.model_graph.get_tensor_by_name('detection_boxes:0')
-    detection_scores = self.model_graph.get_tensor_by_name('detection_scores:0')
-    detection_classes = self.model_graph.get_tensor_by_name('detection_classes:0')
-    image_np = self.process_image(image_np)
+    def predict(self, image_np, min_score_threshold=0.5):
+        image_tensor = self.model_graph.get_tensor_by_name('image_tensor:0')
+        detection_boxes = self.model_graph.get_tensor_by_name('detection_boxes:0')
+        detection_scores = self.model_graph.get_tensor_by_name('detection_scores:0')
+        detection_classes = self.model_graph.get_tensor_by_name('detection_classes:0')
+        image_np = self.process_image(image_np)
 
-    (boxes, scores, classes) = self.session.run([
-        detection_boxes, detection_scores, detection_classes],
-        feed_dict = {image_tensor: np.expand_dims(image_np, axis=0)}
-    )
+        (boxes, scores, classes) = self.session.run([
+            detection_boxes, detection_scores, detection_classes],
+            feed_dict = {image_tensor: np.expand_dims(image_np, axis=0)}
+        )
 
-    scores = np.squeeze(scores)
-    classes = np.squeeze(classes)
-    boxes = np.squeeze(boxes)
+        scores = np.squeeze(scores)
+        classes = np.squeeze(classes)
+        boxes = np.squeeze(boxes)
 
-    for i, box in enumerate(boxes):
-        if(scores[i] > min_score_threshold):
-            light_class = self.classes[classes[i]]
-            self.save_image(image_np, light_class)
-            rospy.logdebug("Detected traffic light class is : %d", light_class)
-            return light_class, scores[i]
-        else:
-            self.save_image(image_np, TrafficLight.UNKNOWN)
+        for i, box in enumerate(boxes):
+            if(scores[i] > min_score_threshold):
+                light_class = self.classes[classes[i]]
+                self.save_image(image_np, light_class)
+                rospy.logdebug("Detected traffic light class is : %d", light_class)
+                return light_class, scores[i]
+            else:
+                self.save_image(image_np, TrafficLight.UNKNOWN)
 
-    return None, None
+        return None, None
 
-def process_image(self, image):
-    image = cv2.resize(image, (MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT))
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    return image
+    def process_image(self, image):
+        image = cv2.resize(image, (MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT))
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        return image
 
-def save_image(self, image, light_class):
-    if(RECORD_IMAGES):
-        bgr_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(os.path.join(IMAGE_PATH, "image_%04i_%d.jpg" % (self.image_counter, light_class)), bgr_image)
-        self.image_counter += 1
+    def save_image(self, image, light_class):
+        if(RECORD_IMAGES):
+            bgr_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(os.path.join(IMAGE_PATH, "image_%04i_%d.jpg" % (self.image_counter, light_class)), bgr_image)
+            self.image_counter += 1
