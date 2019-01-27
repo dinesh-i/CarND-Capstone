@@ -28,6 +28,7 @@ class TLDetector(object):
         self.waypoint_tree = None
 
         self.image_count = 0
+        self.skip_image_processing = True
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -80,6 +81,9 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
+        if self.skip_image_processing:
+            rospy.loginfo("skip image processing")
+            return
         if self.image_count != 0 and NO_OF_IMAGES_TO_SKIP % self.image_count != 0:
             self.image_count = NO_OF_IMAGES_TO_SKIP % (self.image_count + 1)
             return
