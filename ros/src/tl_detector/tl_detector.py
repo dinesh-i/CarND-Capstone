@@ -13,7 +13,7 @@ import yaml
 from scipy.spatial import KDTree 
 
 STATE_COUNT_THRESHOLD = 3
-NO_OF_IMAGES_TO_SKIP = 7
+NO_OF_IMAGES_TO_SKIP = 5
 
 class TLDetector(object):
     def __init__(self):
@@ -107,6 +107,10 @@ class TLDetector(object):
             self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
+            if state == TrafficLight.RED:
+                rospy.loginfo(".....BRAKE.....")
+            else:
+                rospy.loginfo(".....DRIVE.....")
             self.upcoming_red_light_pub.publish(Int32(light_wp))
         else:
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
@@ -138,6 +142,7 @@ class TLDetector(object):
         """
         # For testing, just return the light state
         #return light.state
+        
         
         if(not self.has_image):
             self.prev_light_loc = None
@@ -181,6 +186,8 @@ class TLDetector(object):
                 diff = d
                 closest_light = light
                 line_wp_idx = temp_wp_idx
+
+            #rospy.loginfo("stop line pos0 : {}, stop line pos1 : {}, temp_wp_idx : {}, car_wp_idx : {}, line_wp_idx: {}".format(line[0], line[1], temp_wp_idx, car_wp_idx, line_wp_idx))
 
         rospy.loginfo("closest_light is at {0}, car is at {1}".format(closest_light.pose.pose.position.x, self.pose.pose.position.x))
 
