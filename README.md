@@ -75,6 +75,6 @@ roslaunch launch/site.launch
 
 ### Attributions
 
-https://medium.com/@WuStangDan/step-by-step-tensorflow-object-detection-api-tutorial-part-1-selecting-a-model-a02b6aabe39e - For an excellent write-up on the whole process of classification
-https://github.com/mkoehnke/CarND-Capstone - For the record, graph and reference implementation
-https://github.com/coldKnight/TrafficLight_Detection-TensorFlowAPI - For the annotated dataset
+* https://medium.com/@WuStangDan/step-by-step-tensorflow-object-detection-api-tutorial-part-1-selecting-a-model-a02b6aabe39e - For an excellent write-up on the whole process of classification
+* https://github.com/mkoehnke/CarND-Capstone - For the record, graph and reference implementation
+* https://github.com/coldKnight/TrafficLight_Detection-TensorFlowAPI - For the annotated dataset
