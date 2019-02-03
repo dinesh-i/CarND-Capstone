@@ -7,7 +7,7 @@ import rospy
 import tensorflow as tf
 
 MAX_IMAGE_HEIGHT = MAX_IMAGE_WIDTH = 300
-RECORD_IMAGES = True
+RECORD_IMAGES = False
 
 IMAGE_PATH = os.path.dirname(os.path.realpath(__file__)) + '/../../../../test_images/simulator/'
 
